@@ -2,7 +2,7 @@
 
 An interactive, high-performance finance dashboard built with **Streamlit**, **yfinance**, and **Plotly**. This tool provides real-time stock data, fundamental health checks, and professional-grade benchmarking against the S&P 500 and Industry averages.
 
-![Dashboard Preview](screenshot.png) 
+![Dashboard Preview](img/dashboard.png) 
 *(Note: Please replace this placeholder with a real screenshot of your running app!)*
 
 ## 🚀 Features
