@@ -60,6 +60,49 @@ st.sidebar.divider()
 st.sidebar.header("📰 News Filter")
 news_search = st.sidebar.text_input("Search News", placeholder="e.g. Earnings, AI, Dividend")
 
+st.sidebar.divider()
+st.sidebar.header("🤖 AI Research Assistant")
+openai_api_key = st.sidebar.text_input("OpenAI API Key", type="password")
+
+if openai_api_key:
+    from langchain_community.tools import DuckDuckGoSearchRun
+    from langchain_openai import ChatOpenAI
+    from langchain.agents import initialize_agent, AgentType
+    
+    # Initialize search tool and LLM
+    search = DuckDuckGoSearchRun()
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key=openai_api_key)
+    
+    # Initialize agent
+    agent = initialize_agent(
+        [search], 
+        llm, 
+        agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, 
+        verbose=True
+    )
+
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
+    # Chat container in sidebar or main? Let's put it in a main-page expander for better space
+    with st.expander("💬 Chat with AI Market Analyst", expanded=False):
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+
+        if prompt := st.chat_input("Ask about market trends, earnings, or news..."):
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
+
+            with st.chat_message("assistant"):
+                with st.spinner("Searching the web and analyzing..."):
+                    response = agent.run(f"Using current web data, answer this investor question about {ticker_symbol} or the market: {prompt}")
+                    st.markdown(response)
+                    st.session_state.messages.append({"role": "assistant", "content": response})
+else:
+    st.sidebar.info("Enter an OpenAI API Key to enable the AI Market Assistant.")
+
 # --- Data Fetching Functions ---
 @st.cache_data(ttl=3600)
 def fetch_stock_info(ticker):
